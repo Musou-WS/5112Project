@@ -5,7 +5,7 @@
 # 3. Source Code
 # 4. Movie (implementation)
 
-from flask import Flask
+from flask import Flask, request
 
 # database
 import chromadb
@@ -38,13 +38,19 @@ collection.add(
 # gpt
 pipe = pipeline("text-generation", model="TinyLlama/TinyLlama-1.1B-Chat-v1.0", torch_dtype=torch.bfloat16, device_map="auto")
 
-@app.route('/')
-def hello_world():  # put application's code here
-    results = collection.query(
-        query_texts=["Alan murdered Kyo"],  # Chroma will embed this for you
-        n_results=2  # how many results to return
-    )
-    print(results)
+@app.route('/generateRelationships')
+def generateRelationships():  # put application's code here
+    plots = request.args.get('plots').split(',')
+    results = []
+    for plot in plots:
+        ragRes = collection.query(
+            query_texts=[plot],  # Chroma will embed this for you
+            n_results=2  # how many results to return
+        )
+        res = []
+        for rel in ragRes['metadatas'][0]:
+            res.append(rel['relationship'])
+        results.append(res)
     return results
 
 @app.route('/ask')
@@ -61,7 +67,6 @@ def ask():
     ]
     prompt = pipe.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
     outputs = pipe(prompt, max_new_tokens=256, do_sample=True, temperature=0.7, top_k=50, top_p=0.95)
-    print(outputs[0]["generated_text"])
     return outputs[0]["generated_text"]
 
 if __name__ == '__main__':
