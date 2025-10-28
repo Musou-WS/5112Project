@@ -72,7 +72,7 @@ def generateRelationshipTree():
         },
     ]
     prompt = pipe.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    outputs = pipe(prompt, max_new_tokens=256, do_sample=True, temperature=0.7, top_k=50, top_p=0.95)
+    outputs = pipe(prompt, do_sample=True, temperature=0.7, top_k=50, top_p=0.95)
     return findAfter(outputs[0]["generated_text"], '<|assistant|>')
 
 @app.route('/initializeStory')
@@ -86,6 +86,75 @@ def initializeStory():
     ]
     prompt = pipe.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
     outputs = pipe(prompt, do_sample=True, temperature=0.7, top_k=50, top_p=0.95)
+    return findAfter(outputs[0]["generated_text"], '<|assistant|>')
+
+@app.route('/buildEvidenceChain')
+def buildEvidenceChain():
+    content = request.args.get('content')
+    messages = [
+        {
+            "role": "user",
+            "content": content + '. Is there any unclear chain of evidence in this story? If yes, fill and output them.'
+        },
+    ]
+    prompt = pipe.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    outputs = pipe(prompt, do_sample=True, temperature=0.7, top_k=50, top_p=0.95)
+    return findAfter(outputs[0]["generated_text"], '<|assistant|>')
+
+@app.route('/updateEvidenceChain')
+def updateEvidenceChain():
+    content = request.args.get('content')
+    evidenceChain = request.args.get('evidenceChain')
+    messages = [
+        {
+            "role": "user",
+            "content": content + '. Evidence Chain is: ' + evidenceChain + 'Is there any other unclear chain of evidence in this story? If yes, fill and output them.'
+        },
+    ]
+    prompt = pipe.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    outputs = pipe(prompt, do_sample=True, temperature=0.7, top_k=50, top_p=0.95)
+    return findAfter(outputs[0]["generated_text"], '<|assistant|>')
+
+@app.route('/buildUnclearParts')
+def buildUnclearParts():
+    content = request.args.get('content')
+    messages = [
+        {
+            "role": "user",
+            "content": content + '. Is there any unclear part in this story? If yes, fill and output them.'
+        },
+    ]
+    prompt = pipe.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    outputs = pipe(prompt, do_sample=True, temperature=0.7, top_k=50, top_p=0.95)
+    return findAfter(outputs[0]["generated_text"], '<|assistant|>')
+
+@app.route('/updateUnclearParts')
+def updateUnclearParts():
+    content = request.args.get('content')
+    unclearParts = request.args.get('unclearParts')
+    messages = [
+        {
+            "role": "user",
+            "content": content + '. Unclear Parts are: ' + unclearParts + 'Is there any other unclear part in this story? If yes, fill and output them.'
+        },
+    ]
+    prompt = pipe.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    outputs = pipe(prompt, do_sample=True, temperature=0.7, top_k=50, top_p=0.95)
+    return findAfter(outputs[0]["generated_text"], '<|assistant|>')
+
+@app.route('/rebuildStory')
+def rebuildStory():
+    content = request.args.get('content')
+    evidenceChain = request.args.get('evidenceChain')
+    unclearParts = request.args.get('unclearParts')
+    messages = [
+        {
+            "role": "user",
+            "content": content + 'Evidence Chain is: ' + evidenceChain + 'Unclear Parts are: ' + unclearParts + 'Rebuild and output the story.'
+        },
+    ]
+    prompt = pipe.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    outputs = pipe(prompt, do_sample=False, temperature=0.7, top_k=50, top_p=0.95)
     return findAfter(outputs[0]["generated_text"], '<|assistant|>')
 
 if __name__ == '__main__':
