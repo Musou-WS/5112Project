@@ -10,18 +10,15 @@ from flask import Flask, request
 # database
 import chromadb
 
-# gpt
-import torch
-from transformers import pipeline
+# AI agent
+from groq import Groq
 app = Flask(__name__)
 
 app.config.from_pyfile('config.py')
-# client = chromadb.CloudClient(
-#   api_key=app.config['API_KEY'],
-#   tenant=app.config['TENANT'],
-#   database=app.config['DATABASE']
-# )
 
+client = Groq(
+    api_key=app.config['GROQ_API_KEY'],
+)
 chroma_client = chromadb.Client()
 # client = chromadb.PersistentClient(path="/path/to/save/to")
 collection = chroma_client.create_collection(name="5112")
@@ -34,18 +31,6 @@ collection.add(
     ],
     metadatas=[{"relationship": "friends"}, {"relationship": "son"}, {"relationship": "son"}]
 )
-
-# gpt
-pipe = pipeline("text-generation", model="TinyLlama/TinyLlama-1.1B-Chat-v1.0", torch_dtype=torch.bfloat16, device_map="auto")
-
-def findAfter(text, marker):
-    marker_index = text.find(marker)
-    if marker_index != -1:
-        start = marker_index + len(marker)
-        result = text[start:]
-    else:
-        result = ""
-    return result
 
 @app.route('/generateRelationships')
 def generateRelationships():  # put application's code here
@@ -68,12 +53,11 @@ def generateRelationshipTree():
     messages = [
         {
             "role": "user",
-            "content": content + '. Generate a relationships between characters based on this.'
+            "content": content + '. Generate a relationship table with details between characters based on this and create it as a html content without styles.'
         },
     ]
-    prompt = pipe.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    outputs = pipe(prompt, do_sample=True, temperature=0.7, top_k=50, top_p=0.95)
-    return findAfter(outputs[0]["generated_text"], '<|assistant|>')
+    prompt = client.chat.completions.create(messages=messages, model='openai/gpt-oss-120b')
+    return prompt.choices[0].message.content
 
 @app.route('/initializeStory')
 def initializeStory():
@@ -81,81 +65,108 @@ def initializeStory():
     messages = [
         {
             "role": "user",
-            "content": content + '. Generate a story based on this.'
+            "content": content + '. Generate a story without subtitle based on this and create it as a html content without styles.'
         },
     ]
-    prompt = pipe.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    outputs = pipe(prompt, do_sample=True, temperature=0.7, top_k=50, top_p=0.95)
-    return findAfter(outputs[0]["generated_text"], '<|assistant|>')
+    prompt = client.chat.completions.create(messages=messages, model='openai/gpt-oss-120b')
+    return prompt.choices[0].message.content
 
-@app.route('/buildEvidenceChain')
+@app.route('/buildEvidenceChain', methods=['POST'])
 def buildEvidenceChain():
-    content = request.args.get('content')
+    json_data = request.get_json()
+    content = json_data.get('content')
     messages = [
         {
             "role": "user",
-            "content": content + '. Is there any unclear chain of evidence in this story? If yes, fill and output them.'
+            "content": content + '. Is there any unclear chain of evidence in this story? If yes, fill and output them as a list.'
         },
     ]
-    prompt = pipe.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    outputs = pipe(prompt, do_sample=True, temperature=0.7, top_k=50, top_p=0.95)
-    return findAfter(outputs[0]["generated_text"], '<|assistant|>')
+    prompt = client.chat.completions.create(messages=messages, model='openai/gpt-oss-120b')
+    return prompt.choices[0].message.content
 
-@app.route('/updateEvidenceChain')
+@app.route('/updateEvidenceChain', methods=['POST'])
 def updateEvidenceChain():
-    content = request.args.get('content')
-    evidenceChain = request.args.get('evidenceChain')
+    json_data = request.get_json()
+    content = json_data.get('content')
+    evidenceChain = json_data.get('evidenceChain')
     messages = [
         {
             "role": "user",
-            "content": content + '. Evidence Chain is: ' + evidenceChain + 'Is there any other unclear chain of evidence in this story? If yes, fill and output them.'
+            "content": 'Content is: ' + content
         },
+        {
+            "role": "user",
+            "content": 'Evidence Chain is: ' + evidenceChain
+        },
+        {
+            "role": "user",
+            "content": "Is there any other unclear chain of evidence in this story? If yes, fill and output them as a list."
+        }
     ]
-    prompt = pipe.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    outputs = pipe(prompt, do_sample=True, temperature=0.7, top_k=50, top_p=0.95)
-    return findAfter(outputs[0]["generated_text"], '<|assistant|>')
+    prompt = client.chat.completions.create(messages=messages, model='openai/gpt-oss-120b')
+    return prompt.choices[0].message.content
 
-@app.route('/buildUnclearParts')
+@app.route('/buildUnclearParts', methods=['POST'])
 def buildUnclearParts():
-    content = request.args.get('content')
+    json_data = request.get_json()
+    content = json_data.get('content')
     messages = [
         {
             "role": "user",
-            "content": content + '. Is there any unclear part in this story? If yes, fill and output them.'
+            "content": content + '. Is there any unclear part in this story? If yes, fill and output them as a list.'
         },
     ]
-    prompt = pipe.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    outputs = pipe(prompt, do_sample=True, temperature=0.7, top_k=50, top_p=0.95)
-    return findAfter(outputs[0]["generated_text"], '<|assistant|>')
+    prompt = client.chat.completions.create(messages=messages, model='openai/gpt-oss-120b')
+    return prompt.choices[0].message.content
 
-@app.route('/updateUnclearParts')
+@app.route('/updateUnclearParts', methods=['POST'])
 def updateUnclearParts():
-    content = request.args.get('content')
-    unclearParts = request.args.get('unclearParts')
+    json_data = request.get_json()
+    content = json_data.get('content')
+    unclearParts = json_data.get('unclearParts')
     messages = [
         {
             "role": "user",
-            "content": content + '. Unclear Parts are: ' + unclearParts + 'Is there any other unclear part in this story? If yes, fill and output them.'
+            "content": 'Content is: ' + content
+        },
+        {
+            "role": "user",
+            "content": 'Unclear Parts are: ' + unclearParts
+        },
+        {
+            "role": "user",
+            "content": 'Is there any other unclear part in this story? If yes, fill and output them as a list.'
         },
     ]
-    prompt = pipe.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    outputs = pipe(prompt, do_sample=True, temperature=0.7, top_k=50, top_p=0.95)
-    return findAfter(outputs[0]["generated_text"], '<|assistant|>')
+    prompt = client.chat.completions.create(messages=messages, model='openai/gpt-oss-120b')
+    return prompt.choices[0].message.content
 
-@app.route('/rebuildStory')
+@app.route('/rebuildStory', methods=['POST'])
 def rebuildStory():
-    content = request.args.get('content')
-    evidenceChain = request.args.get('evidenceChain')
-    unclearParts = request.args.get('unclearParts')
+    json_data = request.get_json()
+    content = json_data.get('content')
+    evidenceChain = json_data.get('evidenceChain')
+    unclearParts = json_data.get('unclearParts')
     messages = [
         {
             "role": "user",
-            "content": content + 'Evidence Chain is: ' + evidenceChain + 'Unclear Parts are: ' + unclearParts + 'Rebuild and output the story.'
+            "content": 'Content is: ' + content
+        },
+        {
+            "role": "user",
+            "content": 'Evidence Chain is: ' + evidenceChain
+        },
+        {
+            "role": "user",
+            "content": 'Unclear Parts are: ' + unclearParts
+        },
+        {
+            "role": "user",
+            "content": 'Add all of the evidence chain and unclear parts to the story and rebuild the story as a html content without styles.'
         },
     ]
-    prompt = pipe.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    outputs = pipe(prompt, do_sample=False, temperature=0.7, top_k=50, top_p=0.95)
-    return findAfter(outputs[0]["generated_text"], '<|assistant|>')
+    prompt = client.chat.completions.create(messages=messages, model='openai/gpt-oss-120b')
+    return prompt.choices[0].message.content
 
 if __name__ == '__main__':
     app.run(port=3000, debug=True)
