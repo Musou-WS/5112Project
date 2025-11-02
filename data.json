@@ -1,0 +1,106 @@
+[{
+  "plots":"The Author left an estate and his legacy is under scrutiny.",
+  "roles":"Parent"
+}, {
+  "plots":"The Business-oriented sibling opposes pursuing the “lost sequel”.",
+  "roles":"Sibling"
+}, {
+  "plots":"The Literary-oriented sibling supports investigating the “lost sequel”.",
+  "roles":"Sibling"
+}, {
+  "plots":"The Trustee receives a tip about a possible lost sequel and initiates investigation.",
+  "roles":"Manages estate"
+}, {
+  "plots":"The Informant reveals evidence suggesting the Author wrote a sequel.",
+  "roles":"Contacts the Trustee"
+}, {
+  "plots":"He used to kill people (“hobby”).",
+  "roles":"Husband of Wife"
+}, {
+  "plots":"His wife and son died.",
+  "roles":"Father of Son"
+}, {
+  "plots":"He ran over the bakery owner with his car.",
+  "roles":"Victim"
+}, {
+  "plots":"He plans to kill the Black Widow.",
+  "roles":"Revenger"
+}, {
+  "plots":"She murdered three husbands.",
+  "roles":"Married to multiple Husbands"
+}, {
+  "plots":"He begins seeing a younger woman.",
+  "roles":"Friend"
+}, {
+  "plots":"He kills enemy soldiers at close range",
+  "roles":"Comrade"
+}, {
+  "plots":"He shoots a sniper in battle.",
+  "roles":"Comrade"
+}, {
+  "plots":"He executes the wounded soldier.",
+  "roles":"Fellow soldier"
+}, {
+  "plots":"He accuses the new recruit of murder.",
+  "roles":"Comrade"
+}, {
+  "plots":"He dominates the family’s power structure.",
+  "roles":"Father"
+}, {
+  "plots":"She returns from abroad seeking something.",
+  "roles":"Child of Aging crime-boss"
+}, {
+  "plots":"She confronts the Don about hidden truths.",
+  "roles":"Step-ally/Agent of Father’s Lieutenant"
+}, {
+  "plots":"He controls secrets and informs the Daughter.",
+  "roles":"Loyal subordinate to Aging crime-boss"
+}, {
+  "plots":"His past affair triggers the Daughter’s vengeance.",
+  "roles":"Biological father of Daughter"
+}, {
+  "plots":"He becomes drawn into actual crime.",
+  "roles":"Partner of Girlfriend"
+}, {
+  "plots":"She lives with the Crime-writer.",
+  "roles":"Live-in partner of Crime-writer"
+}, {
+  "plots":"He challenges the notion of murder in fiction.",
+  "roles":"Panel member to Crime-writer"
+}, {
+  "plots":"Listens to the discussion about crime fiction.",
+  "roles":"Observer of panel"
+}, {
+  "plots":"He discovers a fraud in antique / art dealing.",
+  "roles":"Client / Patron"
+}, {
+  "plots":"She attempts to purchase or exploit a valuable piece for her own gain.",
+  "roles":"Benefactor to the charity"
+}, {
+  "plots":"He assists with the creation or copying of art/antiques in the scheme.",
+  "roles":"Associate of Art dealer"
+}, {
+  "plots":"He/She facilitates part of the fraud or scheme behind the scenes.",
+  "roles":"Partner of Art dealer"
+}, {
+  "plots":"He is observed by the neighbours during odd behaviour.",
+  "roles":"Neighbour of Nosy Neighbour Couple"
+}, {
+  "plots":"They suspect the Homeowner of wrongdoing.",
+  "roles":"Neighbours of Homeowner"
+}, {
+  "plots":"The Spouse disappears.",
+  "roles":"Spouse of Homeowner"
+}, {
+  "plots":"He fights under the Captain in war.",
+  "roles":"Comrade of Captain Officer"
+}, {
+  "plots":"He leads the Corporal in military action.",
+  "roles":"Superior to Corporal Soldier"
+}, {
+  "plots":"He manipulates affairs behind the scenes.",
+  "roles":"Mentor/Influence to soldiers"
+}, {
+  "plots":"He is executed or removed by forces linked to the Great Man.",
+  "roles":"Opponent of the Great Man or regime"
+}]

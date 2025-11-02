@@ -5,6 +5,11 @@
 # 3. Source Code
 # 4. Movie (implementation)
 
+# https://strandmag.com/the-magazine/short-stories/
+
+import math
+import numpy as np
+import json
 from flask import Flask, request
 
 # database
@@ -22,15 +27,46 @@ client = Groq(
 chroma_client = chromadb.Client()
 # client = chromadb.PersistentClient(path="/path/to/save/to")
 collection = chroma_client.create_collection(name="5112")
-collection.add(
-    ids=["1", "2", "3"],
-    documents=[
-        "A murdered B",
-        "detective C",
-        "A killed B"
-    ],
-    metadatas=[{"relationship": "friends"}, {"relationship": "son"}, {"relationship": "son"}]
-)
+def insertData():
+    with open('data.json', 'r') as f:
+        data = json.load(f)
+    ids = []
+    documents = []
+    metadatas = []
+    #insert data into database
+    for index, item in enumerate(data):
+        ids.append(str(index))
+        documents.append(item['plots'])
+        metadatas.append({"relationship": item['roles']})
+    collection.add(
+        ids=ids,
+        documents=documents,
+        metadatas=metadatas,
+    )
+insertData()
+
+def simulatedAnnealing(ragRes):
+    rels = ragRes['metadatas'][0]
+    distances = ragRes['distances'][0]
+    largestDistance = distances[-1]
+    smallestDistance = distances[0]
+    # when largest rel, possibility = 1
+    T = largestDistance-smallestDistance # initial temperature
+    # when smallest rel, possibility = 0.1
+    Tend = -T/math.log(0.1) # final temperature
+    Tgap = (T-Tend)/4
+    result = []
+    currentLoss = smallestDistance
+    for index, rel in enumerate(rels):
+        p = math.exp(-(distances[index]-currentLoss)/T)
+        T = T - Tgap
+        # generate a random number
+        r = np.random.uniform(low=0, high=1)
+        # if r pass the possibility test, add the relationship
+        if r < p:
+            result.append(rel)
+    print(result)
+    return result
 
 @app.route('/generateRelationships')
 def generateRelationships():  # put application's code here
@@ -39,10 +75,11 @@ def generateRelationships():  # put application's code here
     for plot in plots:
         ragRes = collection.query(
             query_texts=[plot],  # Chroma will embed this for you
-            n_results=2  # how many results to return
+            n_results=5  # how many results to return
         )
         res = []
-        for rel in ragRes['metadatas'][0]:
+        rels = simulatedAnnealing(ragRes)
+        for rel in rels:
             res.append(rel['relationship'])
         results.append(res)
     return results
@@ -53,7 +90,7 @@ def generateRelationshipTree():
     messages = [
         {
             "role": "user",
-            "content": content + '. Generate a relationship table with details between characters based on this and create it as a html content without styles.'
+            "content": content + '. Generate a relationship table between characters based on this and create it as a html content without styles.'
         },
     ]
     prompt = client.chat.completions.create(messages=messages, model='openai/gpt-oss-120b')
@@ -162,7 +199,7 @@ def rebuildStory():
         },
         {
             "role": "user",
-            "content": 'Add all of the evidence chain and unclear parts to the story and rebuild the story as a html content without styles.'
+            "content": 'Add all of the evidence chain and unclear parts to the story and rebuild the story without subtitle as a html content without styles.'
         },
     ]
     prompt = client.chat.completions.create(messages=messages, model='openai/gpt-oss-120b')
