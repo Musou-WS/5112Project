@@ -17,7 +17,11 @@ def linearlyPossibility(rels):
     for rel in rels:
         p = 1 - (rel - rels[0])*possibilityGap
         print(p)
+print('simulatedAnnealing')
 simulatedAnnealing([1.111111111, 1.111111112, 1.111111112, 1.111111112, 1.111111115])
+print('linearlyPossibility')
 linearlyPossibility([1.111111111, 1.111111112, 1.111111112, 1.111111112, 1.111111115])
+print('simulatedAnnealing')
 simulatedAnnealing([1.111111111, 1.4999999, 1.4999999, 1.4999999, 1.5])
+print('linearlyPossibility')
 linearlyPossibility([1.111111111, 1.4999999, 1.4999999, 1.4999999, 1.5])

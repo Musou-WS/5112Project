@@ -56,20 +56,18 @@ def simulatedAnnealing(ragRes):
     Tend = -T/math.log(0.1) # final temperature
     Tgap = (T-Tend)/4
     result = []
-    currentLoss = smallestDistance
     for index, rel in enumerate(rels):
-        p = math.exp(-(distances[index]-currentLoss)/T)
+        p = math.exp(-(distances[index]-smallestDistance)/T)
         T = T - Tgap
         # generate a random number
         r = np.random.uniform(low=0, high=1)
         # if r pass the possibility test, add the relationship
         if r < p:
             result.append(rel)
-    print(result)
     return result
 
 @app.route('/generateRelationships')
-def generateRelationships():  # put application's code here
+def generateRelationships():
     plots = request.args.get('plots').split(',')
     results = []
     for plot in plots:
